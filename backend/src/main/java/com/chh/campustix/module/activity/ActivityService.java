@@ -54,10 +54,12 @@ public class ActivityService {
             if (cached != null) {
                 // 空值缓存：防止恶意 id 反复穿透
                 if (cached.isBlank()) {
-                    return null;
+                    throw new BizException(ResultCode.NOT_FOUND, "活动不存在或已下架");
                 }
                 return objectMapper.readValue(cached, ActivityDetailVO.class);
             }
+        } catch (BizException e) {
+            throw e;
         } catch (Exception e) {
             log.warn("活动详情缓存读取失败，降级查库 id={}", id, e);
         }
@@ -71,7 +73,7 @@ public class ActivityService {
             Activity a = activityMapper.selectById(id);
             if (a == null || !Activity.STATUS_PUBLISHED.equals(a.getStatus())) {
                 stringRedisTemplate.opsForValue().set(key, "", Duration.ofSeconds(30));
-                return null;
+                throw new BizException(ResultCode.NOT_FOUND, "活动不存在或已下架");
             }
             ActivityDetailVO vo = buildDetail(a, sessionMapper.selectList(
                     new LambdaQueryWrapper<ActivitySession>()
@@ -96,7 +98,7 @@ public class ActivityService {
     private ActivityDetailVO buildDetail(Long id) {
         Activity a = activityMapper.selectById(id);
         if (a == null || !Activity.STATUS_PUBLISHED.equals(a.getStatus())) {
-            return null;
+            throw new BizException(ResultCode.NOT_FOUND, "活动不存在或已下架");
         }
         return buildDetail(a, sessionMapper.selectList(new LambdaQueryWrapper<ActivitySession>()
                 .eq(ActivitySession::getActivityId, id)
