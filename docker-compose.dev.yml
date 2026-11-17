@@ -1,0 +1,55 @@
+name: campustix-dev
+
+services:
+  mysql:
+    image: mysql:8.0.36
+    container_name: campustix-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: campustix
+      MYSQL_USER: campustix
+      MYSQL_PASSWORD: campustix123
+      TZ: Asia/Shanghai
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci --ngram_token_size=2
+    ports:
+      - "3306:3306"
+    volumes:
+      - campustix-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot123456"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: campustix-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly no --save ""
+
+  namesrv:
+    image: apache/rocketmq:5.3.1
+    container_name: campustix-namesrv
+    command: sh mqnamesrv
+    environment:
+      JAVA_OPT_EXT: "-Xms256m -Xmx256m -Xmn128m"
+    ports:
+      - "9876:9876"
+
+  broker:
+    image: apache/rocketmq:5.3.1
+    container_name: campustix-broker
+    command: sh mqbroker -n namesrv:9876 -c /rmq/broker.conf
+    environment:
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m -Xmn256m"
+    ports:
+      - "10911:10911"
+      - "10909:10909"
+    volumes:
+      - ./deploy/rocketmq/broker.conf:/rmq/broker.conf:ro
+    depends_on:
+      - namesrv
+
+volumes:
+  campustix-mysql-data:

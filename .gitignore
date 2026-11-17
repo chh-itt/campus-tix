@@ -1,0 +1,25 @@
+# Java
+backend/target/
+*.class
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 环境变量（含密钥）
+.env
+*.local
+
+# 压测报告
+benchmark/results/
+
+it-run.log
+backend-dev.log
+.photo_base64.txt
