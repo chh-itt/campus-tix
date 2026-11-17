@@ -57,7 +57,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/activities/**").permitAll()
                         .requestMatchers("/api/payments/mock/pay", "/api/payments/mock/notify", "/api/payments/alipay/notify").permitAll()
-                        .requestMatchers("/api/ai/faq/ask").permitAll()
+                        .requestMatchers("/api/ai/faq/ask", "/api/ai/faq/list").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e.authenticationEntryPoint((req, res, ex) -> {
                     res.setStatus(200);

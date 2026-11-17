@@ -23,3 +23,5 @@ benchmark/results/
 it-run.log
 backend-dev.log
 .photo_base64.txt
+
+shots/

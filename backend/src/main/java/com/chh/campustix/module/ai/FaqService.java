@@ -48,6 +48,16 @@ public class FaqService {
                 .build();
     }
 
+    /** 活动详情页 FAQ 列表：本活动 + 全局，最多 20 条 */
+    public List<String> listQuestions(Long activityId) {
+        return faqMapper.selectList(new LambdaQueryWrapper<Faq>()
+                .and(activityId != null,
+                        w -> w.eq(Faq::getActivityId, activityId).or().isNull(Faq::getActivityId))
+                .orderByDesc(Faq::getId)
+                .last("LIMIT 20"))
+                .stream().map(Faq::getQuestion).toList();
+    }
+
     public FaqAnswerVO ask(String subjectKey, FaqAskReq req) {
         rateLimit(subjectKey);
 

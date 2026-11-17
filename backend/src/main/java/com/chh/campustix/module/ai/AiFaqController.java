@@ -6,10 +6,14 @@ import com.chh.campustix.module.ai.dto.FaqAskReq;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/ai/faq")
@@ -17,6 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class AiFaqController {
 
     private final FaqService faqService;
+
+    /** 活动详情页 FAQ 列表（免登录） */
+    @GetMapping("/list")
+    public Result<List<String>> list(@RequestParam(required = false) Long activityId) {
+        return Result.ok(faqService.listQuestions(activityId));
+    }
 
     @PostMapping("/ask")
     public Result<FaqAnswerVO> ask(@Valid @RequestBody FaqAskReq req, HttpServletRequest request) {

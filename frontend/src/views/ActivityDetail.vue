@@ -8,6 +8,7 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const detail = ref(null)
+const loadErr = ref('')
 const faqs = ref([])
 const openFaq = ref(-1)
 const aiQuestion = ref('')
@@ -16,11 +17,15 @@ const aiLoading = ref(false)
 const buying = ref(0)
 
 async function load() {
+  loadErr.value = ''
   try {
     detail.value = await http.get('/api/activities/' + route.params.id)
-  } catch (e) { window.__toast?.(e.message, true); return }
+  } catch (e) {
+    loadErr.value = e.message || '加载失败'
+    return
+  }
   try {
-    faqs.value = (await http.post('/api/ai/faq/ask', { activityId: route.params.id, question: ' ' })).sources || []
+    faqs.value = (await http.get('/api/ai/faq/list', { params: { activityId: route.params.id } })) || []
   } catch { /* FAQ 可为空 */ }
 }
 
@@ -119,6 +124,12 @@ onMounted(load)
           依据资料：{{ aiAnswer.sources.join('、') }}
         </div>
       </div>
+    </div>
+  </main>
+  <main class="page" v-else-if="loadErr">
+    <div class="empty">
+      加载失败：{{ loadErr }}<br /><br />
+      <button class="btn primary" @click="load">重试</button>
     </div>
   </main>
   <main class="page" v-else><div class="empty">加载中…</div></main>
